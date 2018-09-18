@@ -1,0 +1,82 @@
+---
+title: "GKodi_Livesession3assignment"
+author: "Ganesh Kodi"
+date: "September 14, 2018"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### 1.	 GitHub Cloning 
+#### Cloning the awesome-public-datasets
+$ mkdir R_Projects
+$ cd R_Projects
+$ git clone https://github.com/caesar0301/awesome-public-datasets
+$ cd awesome-public-datasets
+
+#### Unzipping titanic.csv archive file
+$ unzip Datasets/titanic.csv.zip
+
+### 2.	Data Summary
+
+```{r titanic_data_summary, echo=TRUE}
+getwd()
+df <- read.table("titanic.csv", sep= ",",header = TRUE) #Reading the titanic csv
+library(plyr) #loading plyr which is used to split-apply-combine pattern in R
+count(df, vars = "Sex") # Count of females and males aboard the Titanic
+plot(df$Sex, xlab="Gender Frequency", ylab="Count",  main="Onboarded Gender Comparison") # Plotting Gender comparison plot of onboarded people
+mean_df <- data.frame("Survival"=df$Survived, "Age"=df$Age, "Fare"=df$Fare) # Creating another data frame for limited column from df
+sapply(mean_df, mean, na.rm=TRUE) # Calculating mean for Age, Survival and Fare
+```
+
+### 3.	Function Building 
+```{r sleep_data_summary, echo=TRUE}
+sleep_data <- function() {
+  sleep_data <- read.table("http://talklab.psy.gla.ac.uk/L1_labs/lab_1/homework/sleep_data_01.csv", sep= ",", header=TRUE) # creating df from online dataset
+  median_age <- median(sleep_data$Age, na.rm = TRUE) # Median Age
+  
+  min_duration <- min(sleep_data$Duration,na.rm = TRUE) # Min Duration
+  
+  max_duration <- max(sleep_data$Duration,na.rm = TRUE) # Max Duration
+  
+  mean_rses <- mean(sleep_data$RSES,na.rm = TRUE) # Mean of RSES
+  
+  sd_rses <- sd(sleep_data$RSES,na.rm = TRUE) # Standard Deviation of RSES
+  
+  report <- data.frame( median_age/5, mean_rses/5, sd_rses/5, (max_duration-min_duration) )
+  names(report) <- c("MedianAge", "SelfEsteem","SE_SD","DurationRange")
+  
+ round(report,2) # Rounding report to 2 decimals
+}
+
+sleep_data()
+```
+
+### 4.	FiveThirtyEight Data
+```{r fivethirtyeight_data, echo=TRUE}
+options(repos = c(CRAN = "http://cran.rstudio.com")) # Setting Cran options
+install.packages("fivethirtyeight") # Install packages
+library(fivethirtyeight) 
+data("daily_show_guests") # Getting 22nd line item dataset
+df <- daily_show_guests # Assinging to df
+dim(df) # Dimention of dataset
+names(df) # Names of datasets
+colnames(df)
+
+
+```
+
+### 5.	Data Summary 
+```{r  fivethirtyeight_data_summary, echo=TRUE}
+colnames(df)
+ncol(df)
+major_count <- data.matrix(sapply(df, function(x) length(unique(x))))
+par(las=2)
+barplot(major_count,xlab = "count", ylab = "names", col=c("darkblue","red"),beside=TRUE, horiz=TRUE, legend = rownames(major_count))
+write.table(df,"daily_show_guests.csv",col.names = FALSE,row.names = FALSE,sep=",") # Writing dataset to csv file
+```
+
+### 6.	Codebook 
+### Git URL : https://github.com/ganeshkodi/smumsds_homework
