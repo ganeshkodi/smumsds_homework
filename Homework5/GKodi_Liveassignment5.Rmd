@@ -1,0 +1,68 @@
+---
+title: "GKodi_Liveassignment5"
+author: "Ganesh Kodi"
+date: "October 1, 2018"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### 1.	Data Munging
+#### Copy provided data file(yob2016.txt) to your working directory
+```{r names_munging, echo=TRUE}
+# Create Dataframe from the source file. 
+df <- data.frame(read.table("yob2016.txt",sep = ";",header = FALSE),row.names = NULL)
+# Add column headers to the created data frame
+names(df) <- c("First Name", "Gender", "Number of Children Named") 
+# Summary of the dataframe
+summary(df)
+# Structure of the dataframe
+str(df)
+# Finding the index of the problemed row
+index <- grep("yyy",df$`First Name`)
+as.character(df$`First Name`[index])
+y2016 <- df[- grep("yyy",df$`First Name`),] 
+
+```
+### 2.	Data Merging  
+#### Copy provided data file(yob2015.txt) to your working directory
+```{r names_merging, echo=TRUE}
+# Create Dataframe from the source file. 
+y2015 <- data.frame(read.table("yob2015.txt",sep = ",",header = FALSE),row.names = NULL)
+# Add column headers to the created data frame
+names(y2015) <- c("Name", "Gender", "Total Children Named") 
+# Last 10 rows for display
+tail(y2015,10)
+
+```
+#### Interesting fact about the last 10 rows in y2016.txt is
+##### 1. All are male children
+##### 2. All names are named exactly 5 in total
+##### 
+### 3.	Data Summary
+```{r names_summary, echo=TRUE}
+# Merge y2015 and y2016 dataframes
+final <- merge(y2015,y2016,by.x=c("Name","Gender"),by.y=c("First Name","Gender"))
+# Check any content having values with NA in names. That should be '0'
+grep('^NA$',final$Name)
+# Add Total column which consisting of total number of names given by name
+final$Total <- final$`Total Children Named`+final$`Number of Children`
+# Sort the Final dataset by Total column
+final <- final[order(final$Total),]
+
+```
+#### Top 10 popular names given in 2015 and 2016
+
+```{r names_dataset_updates, echo=TRUE}
+# Printing 10 popular names in 2015 and 2016
+as.character(tail(final$Name,10))
+# Create new dataset and Omit all male child names and keeping only female child names
+girls <- final[- grep("M",final$Gender),]
+girls_final <- girls[c("Name","Total")]
+# Write 10 popular girl names to csv 
+write.csv(tail(girls_final,10), "Girls.csv")
+
+```
+
