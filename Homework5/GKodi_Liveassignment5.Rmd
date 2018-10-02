@@ -65,4 +65,5 @@ girls_final <- girls[c("Name","Total")]
 write.csv(tail(girls_final,10), "Girls.csv")
 
 ```
-
+#### GIt URL for this assignment 
+https://github.com/ganeshkodi/smumsds_homework
