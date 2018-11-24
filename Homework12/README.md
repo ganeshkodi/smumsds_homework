@@ -1,5 +1,6 @@
 # Homework 12 assignments
-This is Hoemwork12 of Ganesh Kodi 
+This is Homework12 of Ganesh Kodi 
+
 R markdown File --> GKodi_Liveassignment12.Rmd
 Related Html File --> GKodi_Liveassignment12.html
 
