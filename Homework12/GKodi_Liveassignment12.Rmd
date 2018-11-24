@@ -1,0 +1,112 @@
+---
+title: "Assignment 12"
+author: "Ganesh Kodi"
+date: "November 20, 2018"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "http://cran.rstudio.com")) # Setting Cran options
+install.packages("dygraphs")
+install.packages("fpp2")
+install.packages("forecast")
+install.packages("xts")
+library("dygraphs")
+library(forecast)
+library(fpp2)
+library(xts)
+
+
+```
+
+### Warm Up: Brief Financial Data 
+#### Summary
+EuStockMarkets is sample data sets of prominent stocks over time avaialale natively in R. Extract DAX index data from European stock data (EuStockMarkets) and analyse the DAX data. Firstly, checking whether the data is Additive or Mulitplicative data and later, decide whether transformation required or not
+
+```{r EuStockMarkets Summary, echo=TRUE}
+#Display EuStockMarkets dataset
+summary(EuStockMarkets)
+#Extract DAX timeseries dataset from EuStockMarkets
+dax <- EuStockMarkets[,1]
+summary(dax) # Summary of the DAX index
+```
+##### Inference: 
+Based on summary statistics, maximum vs minimum value are not huge ratio i.e. more than 10, Transformation is not necessary. Model is of Additive type. Continue with original DAX data would be prefered for analysis. 
+
+#### Plot 
+Rudimentary plot for European stock data and DAX stock data
+```{r EuStockMarkets Plot, echo=TRUE}
+# Plot the line graph of the European Stock Markets Data
+plot(EuStockMarkets, col="blue", xlab="Year", ylab="Index value", main="European stock data analysis of 90's" )
+abline(v=1997, col="red")
+# Plot the line graph of the DAX Stock Markets Data
+plot(dax, col="blue", xlab="Year", ylab="Index value", main="DAX stock data analysis of 90's" )
+abline(v=1997, col="red")
+```
+
+#### Decompose DAX stock data 
+Decompose DAX stock data into Trend, Seasonal and Random components. Make it multiplicative model
+```{r DAX Decompose, echo=TRUE}
+daxcomp <- decompose(dax, type = "mult")
+plot(daxcomp, col="blue")
+abline(v=1997, col="red")
+```
+
+### 2.	Temperature Data 
+#### Summary
+Maxtemp is dataset contains time series data of Maximum annual temperatures (degrees Celsius) for Moorabbin Airport, Melbourne. 1971-2016.
+```{r maxtemp, echo=TRUE}
+autoplot(maxtemp) # Command in the example section of help of maxtemp
+
+```
+
+#### Subset
+Subsetting the data after 1990
+```{r maxtemp subset, echo=TRUE}
+subtemp <- subset(maxtemp, start=20) #Subsetting time series data from 1990 which is 20th index
+
+```
+
+Using SES predict next five years of maximum temperature of Melbourne. Plot forecast and predicted line overlay on the plot
+```{r ses with subtemp, echo=TRUE }
+fitsubtemp <- ses(subtemp, h=5) # Creating SES linear trend of the subset
+plot(fitsubtemp) # Plot the fit
+lines(fitted(fitsubtemp),col="blue") # Overlay the predicated line over plot
+summary(fitsubtemp) # Using summary collect AICs value
+```
+
+Using holt linear method predict next five years of maximum temperature of Melbourne. Plot forecast and predicted line overlay on the plot
+```{r holt with subtemp, echo=TRUE }
+fitholtsubtemp <- holt(subtemp, initial="optimal", h=5) # Creating holt linear tred of the subset
+plot(fitholtsubtemp) # Plot the fit
+lines(fitted(fitholtsubtemp),col="blue") # Overlay the predicated line over plot
+summary(fitholtsubtemp) # Using summary collect AICs value
+```
+##### AICc for the different model are
+####### 1. SES  --> 141.53
+####### 2. Holt --> 142.23
+
+### 3.	The Wands Choose the Wizard 
+#### Summary
+Creating the timeseries of Wands from dataset provided and convert it to xts object and Using dygraph package analyse the timeseries
+```{r wands summary, echo=TRUE}
+df_gregowitch <- read.csv("source/Unit11TimeSeries_Gregorovitch.csv") #Creating dataset from Unit11TimeSeries_Gregorovitch.csv in source folder 
+df_ollivander <- read.csv("source/Unit11TimeSeries_Ollivander.csv") #Creating dataset from Unit11TimeSeries_Ollivander.csv in source folder
+names(df_gregowitch) <- c("Year", "Numbers") #Name the column headers
+names(df_ollivander) <- c("Year", "Numbers") #Name the column headers
+df_gregowitch$Year <- as.Date.character(df_gregowitch$Year,format = "%d/%m/%Y") #Format the Year column proper date format
+df_ollivander$Year <- as.Date.character(df_ollivander$Year,format = "%d/%m/%Y") #Format the Year column proper date format
+xts_gregowitch <- as.xts(read.zoo(df_gregowitch)) #Convert data frame to xts object
+xts_ollivander <- as.xts(read.zoo(df_ollivander)) #Convert data frame to xts object
+merge_wands <-merge(xts_gregowitch,xts_ollivander) #Combine both the xts object
+dygraph(merge_wands,main = "Wand sales comparison between wand makers", xlab = "Year", ylab = "Numbers") %>%   #Create dygraph
+dySeries("xts_ollivander", label= "Olivander",drawPoints = TRUE,  color = "blue") %>%  dySeries("xts_gregowitch", label="Gregowitch", drawPoints = TRUE , color = "green") %>%  #Label and color the series
+  dyRangeSelector() %>% #Activate range selector
+dyShading(from = "1995-1-1", to = "1999-1-1", color = "orange") #Sharding the time between 1995-1999
+
+
+
+```
+
